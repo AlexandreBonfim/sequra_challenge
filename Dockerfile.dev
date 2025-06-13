@@ -1,0 +1,24 @@
+FROM ruby:3.2
+
+# Install OS dependencies
+RUN apt-get update -qq && apt-get install -y \
+  nodejs \
+  postgresql-client \
+  build-essential \
+  libpq-dev
+
+# Create app directory
+WORKDIR /app
+
+# Install dependencies
+COPY Gemfile Gemfile.lock ./
+RUN bundle install
+
+# Copy the whole app
+COPY . .
+
+# Entrypoint handles temp files etc.
+ENTRYPOINT ["./entrypoint.sh"]
+
+# Start Rails server
+CMD ["rails", "server", "-b", "0.0.0.0"]
