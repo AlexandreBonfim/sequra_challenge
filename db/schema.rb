@@ -10,9 +10,21 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_06_13_150118) do
+ActiveRecord::Schema[8.0].define(version: 2025_06_15_210708) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
+
+  create_table "disbursements", force: :cascade do |t|
+    t.string "reference"
+    t.date "date"
+    t.decimal "total_amount", precision: 10, scale: 2
+    t.decimal "total_fees", precision: 10, scale: 2
+    t.uuid "merchant_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["merchant_id"], name: "index_disbursements_on_merchant_id"
+    t.index ["reference"], name: "index_disbursements_on_reference", unique: true
+  end
 
   create_table "merchants", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.string "reference"
@@ -34,5 +46,6 @@ ActiveRecord::Schema[8.0].define(version: 2025_06_13_150118) do
     t.index ["merchant_id"], name: "index_orders_on_merchant_id"
   end
 
+  add_foreign_key "disbursements", "merchants"
   add_foreign_key "orders", "merchants"
 end
