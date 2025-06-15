@@ -1,0 +1,15 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  id: MyString
+  amount: 9.99
+  ordered_at: 2025-06-13 17:01:18
+  merchant_reference: MyString
+  merchant: one
+
+two:
+  id: MyString
+  amount: 9.99
+  ordered_at: 2025-06-13 17:01:18
+  merchant_reference: MyString
+  merchant: two

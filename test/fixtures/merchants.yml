@@ -1,0 +1,17 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  id: 
+  reference: MyString
+  email: MyString
+  live_on: 2025-06-13
+  disbursement_frequency: MyString
+  minimum_monthly_fee: 9.99
+
+two:
+  id: 
+  reference: MyString
+  email: MyString
+  live_on: 2025-06-13
+  disbursement_frequency: MyString
+  minimum_monthly_fee: 9.99
