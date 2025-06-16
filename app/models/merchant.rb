@@ -1,2 +1,7 @@
 class Merchant < ApplicationRecord
+  DISBURSEMENT_FREQUENCY_DAILY = "daily".freeze
+  DISBURSEMENT_FREQUENCY_WEEKLY = "weekly".freeze
+  DISBURSEMENT_FREQUENCIES = [ DISBURSEMENT_FREQUENCY_DAILY, DISBURSEMENT_FREQUENCY_WEEKLY ].freeze
+
+  has_many :orders
 end
