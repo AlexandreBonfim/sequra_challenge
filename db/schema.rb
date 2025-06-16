@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_06_15_210708) do
+ActiveRecord::Schema[8.0].define(version: 2025_06_16_071746) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -36,6 +36,16 @@ ActiveRecord::Schema[8.0].define(version: 2025_06_15_210708) do
     t.datetime "updated_at", null: false
   end
 
+  create_table "monthly_fees", force: :cascade do |t|
+    t.uuid "merchant_id", null: false
+    t.integer "year", null: false
+    t.integer "month", null: false
+    t.decimal "amount", precision: 10, scale: 2, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["merchant_id"], name: "index_monthly_fees_on_merchant_id"
+  end
+
   create_table "orders", id: :string, force: :cascade do |t|
     t.decimal "amount", null: false
     t.datetime "ordered_at", null: false
@@ -43,9 +53,13 @@ ActiveRecord::Schema[8.0].define(version: 2025_06_15_210708) do
     t.uuid "merchant_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.bigint "disbursement_id", null: false
+    t.index ["disbursement_id"], name: "index_orders_on_disbursement_id"
     t.index ["merchant_id"], name: "index_orders_on_merchant_id"
   end
 
   add_foreign_key "disbursements", "merchants"
+  add_foreign_key "monthly_fees", "merchants"
+  add_foreign_key "orders", "disbursements"
   add_foreign_key "orders", "merchants"
 end
