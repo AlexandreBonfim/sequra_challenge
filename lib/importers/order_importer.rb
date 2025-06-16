@@ -1,4 +1,5 @@
 require "importers/base_importer"
+require "set"
 
 module Importers
   class OrderImporter < BaseImporter

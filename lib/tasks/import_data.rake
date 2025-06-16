@@ -1,7 +1,3 @@
-require "csv"
-require "ruby-progressbar"
-require "benchmark"
-require "set"
 require "importers/merchant_importer"
 require "importers/order_importer"
 
