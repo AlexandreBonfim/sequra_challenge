@@ -39,7 +39,7 @@ RSpec.describe DisbursementCreator do
         expect(disbursement.date).to eq(date)
         expect(disbursement.total_amount).to eq(297.15)
         expect(disbursement.total_fees).to eq(2.85)
-        expect(disbursement.reference).to match(/^DISP-#{merchant.reference}-\d{14}$/)
+        expect(disbursement.reference).to match(/^DISP-#{merchant.reference}-\d{8}$/)
       end
 
       it "updates orders with the disbursement reference" do
