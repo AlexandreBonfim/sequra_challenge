@@ -27,10 +27,10 @@ class DisbursementCreator
 
   def eligible_for_disbursement?(merchant)
     case merchant.disbursement_frequency
-    when "daily"
+    when Merchant::DISBURSEMENT_FREQUENCY_DAILY
       true
-    when "weekly"
-      merchant.live_on.wday == date.wday
+    when Merchant::DISBURSEMENT_FREQUENCY_WEEKLY
+      merchant.live_on.wday == date.wday  # Process on the same weekday as live_on
     else
       false
     end
@@ -40,9 +40,13 @@ class DisbursementCreator
     orders = eligible_orders(merchant)
     return if orders.empty?
 
+    # Check if disbursement already exists for this merchant and date
+    existing_disbursement = Disbursement.find_by(merchant: merchant, date: date)
+    return if existing_disbursement
+
     disbursement = Disbursement.create!(
       merchant: merchant,
-      date: disbursement_date(merchant),
+      date: date,
       reference: generate_reference(merchant),
       total_amount: 0,
       total_fees: 0
@@ -81,10 +85,6 @@ class DisbursementCreator
     end
   end
 
-  def disbursement_date(merchant)
-    merchant.disbursement_frequency == Merchant::DISBURSEMENT_FREQUENCY_WEEKLY ? date.end_of_week(:sunday) : date
-  end
-
   def calculate_fee(amount)
     rate =
       if amount < 50
@@ -99,7 +99,8 @@ class DisbursementCreator
   end
 
   def generate_reference(merchant)
-    timestamp = Time.current.utc.strftime("%Y%m%d%H%M%S")
-    "DISP-#{merchant.reference}-#{timestamp}"
+    # Create a unique reference: DISP-{merchant_ref}-{YYYYMMDD}
+    # Since we ensure one disbursement per merchant per date, this will be unique
+    "DISP-#{merchant.reference}-#{date.strftime('%Y%m%d')}"
   end
 end
