@@ -20,12 +20,21 @@ class MonthlyFeeCalculator
       min_fee = BigDecimal(merchant.minimum_monthly_fee.to_s).round(2)
 
       if total_fees < min_fee
-        MonthlyFee.create!(
+        monthly_fee_amount = (min_fee - total_fees).round(2)
+
+        # Use find_or_create_by to handle existing records
+        monthly_fee = MonthlyFee.find_or_create_by(
           merchant: merchant,
           year: @year,
-          month: @month,
-          amount: (min_fee - total_fees).round(2)
-        )
+          month: @month
+        ) do |fee|
+          fee.amount = monthly_fee_amount
+        end
+
+        # Update amount if record already existed
+        if monthly_fee.persisted? && monthly_fee.amount != monthly_fee_amount
+          monthly_fee.update!(amount: monthly_fee_amount)
+        end
       end
     end
   end

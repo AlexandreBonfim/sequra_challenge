@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_06_17_150737) do
+ActiveRecord::Schema[8.0].define(version: 2025_06_17_163631) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -44,7 +44,6 @@ ActiveRecord::Schema[8.0].define(version: 2025_06_17_150737) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["merchant_id", "year", "month"], name: "index_monthly_fees_on_merchant_id_and_year_and_month", unique: true
-    t.index ["merchant_id"], name: "index_monthly_fees_on_merchant_id"
   end
 
   create_table "orders", id: :string, force: :cascade do |t|
