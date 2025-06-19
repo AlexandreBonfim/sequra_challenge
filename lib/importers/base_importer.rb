@@ -46,7 +46,7 @@ module Importers
     end
 
     def create_progress_bar
-      total_lines = `wc -l "#{path}"`.split.first.to_i - 1 # minus header line
+      total_lines = File.foreach(path).count - 1 # minus header line
       ProgressBar.create(
         title: "Importing #{model_name}",
         total: total_lines,
