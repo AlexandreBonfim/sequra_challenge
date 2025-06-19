@@ -1,0 +1,41 @@
+---
+openapi: 3.0.1
+info:
+  title: API V1
+  version: v1
+paths:
+  "/api/v1/orders":
+    post:
+      summary: Creates a new Order
+      tags:
+      - Orders
+      parameters: []
+      responses:
+        '201':
+          description: Order created
+        '422':
+          description: Invalid request
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                amount:
+                  type: number
+                  format: float
+                ordered_at:
+                  type: string
+                  format: date_time
+                merchant_id:
+                  type: string
+              required:
+              - amount
+              - ordered_at
+              - merchant_id
+
+servers:
+- url: http://{defaultHost}
+  variables:
+    defaultHost:
+      default: localhost:3000
