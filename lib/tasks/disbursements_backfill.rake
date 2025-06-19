@@ -104,7 +104,7 @@ namespace :disbursements do
     return { disbursements_created: 0, orders_updated: 0 } if orders.empty?
 
     # Use database-level uniqueness check to prevent race conditions
-    reference = generate_reference(merchant, date)
+    reference = ReferenceGenerator.disbursement_reference(merchant)
 
     # Try to create disbursement with unique constraint
     begin
@@ -125,7 +125,7 @@ namespace :disbursements do
     total_fees = BigDecimal("0")
 
     orders.each do |order|
-      fee = calculate_fee(order.amount)
+      fee = FeeCalculator.calculate(order.amount)
       net = (order.amount - fee).round(2)
 
       total_fees += fee
@@ -151,22 +151,5 @@ namespace :disbursements do
     else
       false
     end
-  end
-
-  def calculate_fee(amount)
-    rate =
-      if amount < 50
-        BigDecimal("0.01")
-      elsif amount <= 300
-        BigDecimal("0.0095")
-      else
-        BigDecimal("0.0085")
-      end
-
-    (amount * rate).round(2)
-  end
-
-  def generate_reference(merchant, date)
-    "DISP-#{merchant[:reference]}-#{date.strftime('%Y%m%d')}"
   end
 end

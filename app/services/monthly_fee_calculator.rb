@@ -14,7 +14,7 @@ class MonthlyFeeCalculator
     Merchant.find_each do |merchant|
       total_fees = merchant.orders
         .where(ordered_at: @start_date..@end_date)
-        .sum { |order| calculate_fee(order.amount) }
+        .sum { |order| FeeCalculator.calculate(order.amount) }
 
       total_fees = BigDecimal(total_fees.to_s).round(2)
       min_fee = BigDecimal(merchant.minimum_monthly_fee.to_s).round(2)
@@ -37,20 +37,5 @@ class MonthlyFeeCalculator
         end
       end
     end
-  end
-
-  private
-
-  def calculate_fee(amount)
-    rate =
-      if amount < 50
-        0.01
-      elsif amount <= 300
-        0.0095
-      else
-        0.0085
-      end
-
-    (amount * rate).round(2)
   end
 end
