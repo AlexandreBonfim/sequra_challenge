@@ -47,7 +47,7 @@ class DisbursementCreator
     disbursement = Disbursement.create!(
       merchant: merchant,
       date: date,
-      reference: generate_reference(merchant),
+      reference: ReferenceGenerator.disbursement_reference(merchant),
       total_amount: 0,
       total_fees: 0
     )
@@ -56,7 +56,7 @@ class DisbursementCreator
     total_fees = BigDecimal("0")
 
     orders.each do |order|
-      fee = calculate_fee(order.amount)
+      fee = FeeCalculator.calculate(order.amount)
       net_amount = (order.amount - fee).round(2)
 
       total_fees += fee
@@ -83,24 +83,5 @@ class DisbursementCreator
     else
       Order.none
     end
-  end
-
-  def calculate_fee(amount)
-    rate =
-      if amount < 50
-        BigDecimal("0.01")
-      elsif amount <= 300
-        BigDecimal("0.0095")
-      else
-        BigDecimal("0.0085")
-      end
-
-    (amount * rate).round(2)
-  end
-
-  def generate_reference(merchant)
-    # Create a unique reference: DISP-{merchant_ref}-{YYYYMMDD}
-    # Since we ensure one disbursement per merchant per date, this will be unique
-    "DISP-#{merchant.reference}-#{date.strftime('%Y%m%d')}"
   end
 end
