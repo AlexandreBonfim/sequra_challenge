@@ -51,15 +51,13 @@ This will:
 3. Import data (merchants AND orders):
 ```bash
 docker-compose run api rake import:merchants import:orders
-run api rake disbursements:backfill
 ```
 
 4. Backfill disbursements and montlhy fees:
 ```bash
-docker-compose run api rake disbursements:backfill
-
-docker-compose run api rake monthly_fees:backfill
+docker-compose run api rake disbursements:backfill monthly_fees:backfill
 ```
+
 **Access points:**
 - API: `http://localhost:3000`
 - Swagger Docs: `http://localhost:3000/api-docs`
@@ -95,7 +93,6 @@ rails db:create db:migrate
 ```bash
 rails import:merchants
 rails import:orders
-rails disbursements:backfill
 ```
 
 4. Backfill disbursements and montlhy fees:
