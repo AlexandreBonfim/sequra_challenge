@@ -47,7 +47,7 @@ class DisbursementCreator
     disbursement = Disbursement.create!(
       merchant: merchant,
       date: date,
-      reference: ReferenceGenerator.disbursement_reference(merchant),
+      reference: ReferenceGenerator.disbursement_reference(merchant.reference),
       total_amount: 0,
       total_fees: 0
     )
@@ -57,10 +57,10 @@ class DisbursementCreator
 
     orders.each do |order|
       fee = FeeCalculator.calculate(order.amount)
-      net_amount = (order.amount - fee).round(2)
+      net = FeeCalculator.net_amount(order.amount)
 
       total_fees += fee
-      total_amount += net_amount
+      total_amount += net
 
       order.update!(disbursement: disbursement)
     end
@@ -72,16 +72,6 @@ class DisbursementCreator
   end
 
   def eligible_orders(merchant)
-    case merchant.disbursement_frequency
-    when Merchant::DISBURSEMENT_FREQUENCY_DAILY
-      merchant.orders.where(disbursement_id: nil, ordered_at: date)
-    when Merchant::DISBURSEMENT_FREQUENCY_WEEKLY
-      return Order.none unless date.wday == merchant.live_on.wday
-
-      from_date = date - 6.days
-      merchant.orders.where(disbursement_id: nil, ordered_at: from_date.beginning_of_day..date.end_of_day)
-    else
-      Order.none
-    end
+    Order.eligible_for_disbursement(merchant, date)
   end
 end

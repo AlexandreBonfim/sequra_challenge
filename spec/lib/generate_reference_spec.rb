@@ -8,7 +8,7 @@ RSpec.describe ReferenceGenerator do
     it 'generates the correct reference string using today\'s date' do
       expected = "DISP-#{merchant.reference}-#{today.strftime('%Y%m%d')}"
 
-      expect(ReferenceGenerator.disbursement_reference(merchant)).to eq(expected)
+      expect(ReferenceGenerator.disbursement_reference(merchant.reference)).to eq(expected)
     end
   end
 end
