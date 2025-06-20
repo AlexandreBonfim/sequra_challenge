@@ -33,6 +33,48 @@ paths:
               - amount
               - ordered_at
               - merchant_id
+  "/api/v1/reports/disbursement_summary.csv":
+    get:
+      summary: Get disbursement summary report
+      tags:
+      - Reports
+      parameters: []
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    year:
+                      type: integer
+                      description: The year of the summary
+                    disbursements_count:
+                      type: integer
+                      description: Total number of disbursements in the year
+                    total_disbursed:
+                      type: number
+                      format: float
+                      description: Total amount disbursed in the year
+                    total_fees:
+                      type: number
+                      format: float
+                      description: Total fees collected in the year
+                    monthly_fees_count:
+                      type: integer
+                      description: Total number of monthly fees in the year
+                    monthly_fees_total:
+                      type: number
+                      format: float
+                      description: Total amount of monthly fees in the year
+            text/csv:
+              schema:
+                type: string
+                format: binary
+                description: CSV file containing the disbursement summary
 
 servers:
 - url: http://{defaultHost}

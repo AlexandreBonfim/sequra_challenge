@@ -15,10 +15,10 @@ ActiveRecord::Schema[8.0].define(version: 2025_06_17_163631) do
   enable_extension "pg_catalog.plpgsql"
 
   create_table "disbursements", force: :cascade do |t|
-    t.string "reference"
-    t.date "date"
-    t.decimal "total_amount", precision: 10, scale: 2
-    t.decimal "total_fees", precision: 10, scale: 2
+    t.string "reference", null: false
+    t.date "date", null: false
+    t.decimal "total_amount", precision: 10, scale: 2, null: false
+    t.decimal "total_fees", precision: 10, scale: 2, null: false
     t.uuid "merchant_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
@@ -27,11 +27,11 @@ ActiveRecord::Schema[8.0].define(version: 2025_06_17_163631) do
   end
 
   create_table "merchants", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
-    t.string "reference"
-    t.string "email"
-    t.date "live_on"
-    t.string "disbursement_frequency"
-    t.decimal "minimum_monthly_fee"
+    t.string "reference", null: false
+    t.string "email", null: false
+    t.date "live_on", null: false
+    t.string "disbursement_frequency", null: false
+    t.decimal "minimum_monthly_fee", precision: 10, scale: 2, null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
   end
@@ -49,7 +49,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_06_17_163631) do
   create_table "orders", id: :string, force: :cascade do |t|
     t.decimal "amount", null: false
     t.datetime "ordered_at", null: false
-    t.string "merchant_reference"
+    t.string "merchant_reference", null: false
     t.uuid "merchant_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
