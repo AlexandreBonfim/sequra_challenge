@@ -18,4 +18,6 @@ class Api::V1::OrdersController < ApplicationController
   def order_params
     params.require(:order).permit(:amount, :ordered_at, :merchant_id)
   end
+
+  # try force test
 end
