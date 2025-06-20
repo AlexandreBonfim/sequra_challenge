@@ -11,4 +11,9 @@ class FeeCalculator
 
     (amount * rate).round(2)
   end
+
+  def self.net_amount(amount)
+    fee = calculate(amount)
+    (amount - fee).round(2)
+  end
 end
