@@ -22,11 +22,9 @@ namespace :disbursements do
       merchant_date_combinations = Order.where(disbursement_id: nil)
                                        .joins(:merchant)
                                        .select("DISTINCT merchants.id as merchant_id, merchants.disbursement_frequency, merchants.live_on, merchants.reference, DATE(orders.ordered_at) as order_date")
-                                       .where("merchants.disbursement_frequency IN (?)", [ Merchant::DISBURSEMENT_FREQUENCY_DAILY, Merchant::DISBURSEMENT_FREQUENCY_WEEKLY ])
 
       # Filter eligible combinations
-      eligible_combinations = []
-      merchant_date_combinations.each do |combo|
+      eligible_combinations = merchant_date_combinations.map do |combo|
         merchant = {
           id: combo.merchant_id,
           disbursement_frequency: combo.disbursement_frequency,
@@ -35,10 +33,8 @@ namespace :disbursements do
         }
         date = combo.order_date.to_date
 
-        if eligible_for_disbursement?(merchant, date)
-          eligible_combinations << { merchant: merchant, date: date }
-        end
-      end
+        { merchant:, date: } if eligible_for_disbursement?(merchant, date)
+      end.compact
 
       puts "📅 Found #{eligible_combinations.size} eligible merchant-date combinations"
 
@@ -47,6 +43,10 @@ namespace :disbursements do
         merchant_id: eligible_combinations.map { |c| c[:merchant][:id] },
         date: eligible_combinations.map { |c| c[:date] }
       ).pluck(:merchant_id, :date).to_set
+
+      # Preload all needed merchants to avoid N+1 queries
+      merchant_ids = eligible_combinations.map { |c| c[:merchant][:id] }.uniq
+      merchants_by_id = Merchant.where(id: merchant_ids).index_by(&:id)
 
       # Filter out existing disbursements
       to_process = eligible_combinations.reject do |combo|
@@ -68,14 +68,17 @@ namespace :disbursements do
 
       to_process.each do |combo|
         thread_pool.post do
-          begin
-            result = process_disbursement_batch(combo[:merchant], combo[:date])
-            mutex.synchronize do
-              results << result
-              progress.increment
+          ActiveRecord::Base.connection_pool.with_connection do
+            begin
+              merchant_record = merchants_by_id[combo[:merchant][:id]]
+              result = process_disbursement_batch(merchant_record, combo[:date])
+              mutex.synchronize do
+                results << result
+                progress.increment
+              end
+            rescue => e
+              puts "❌ Error processing #{combo[:merchant][:id]}-#{combo[:date]}: #{e.message}"
             end
-          rescue => e
-            puts "❌ Error processing #{combo[:merchant][:id]}-#{combo[:date]}: #{e.message}"
           end
         end
       end
@@ -96,15 +99,11 @@ namespace :disbursements do
   private
 
   def process_disbursement_batch(merchant, date)
-    # Get all orders for this merchant and date
-    orders = Order.where(disbursement_id: nil, merchant_id: merchant[:id])
-                  .where("DATE(ordered_at) = ?", date)
-                  .to_a
+    orders = Order.eligible_for_disbursement(merchant, date).to_a
 
     return { disbursements_created: 0, orders_updated: 0 } if orders.empty?
 
-    # Use database-level uniqueness check to prevent race conditions
-    reference = ReferenceGenerator.disbursement_reference(merchant)
+    reference = ReferenceGenerator.disbursement_reference(merchant[:reference])
 
     # Try to create disbursement with unique constraint
     begin
@@ -126,7 +125,7 @@ namespace :disbursements do
 
     orders.each do |order|
       fee = FeeCalculator.calculate(order.amount)
-      net = (order.amount - fee).round(2)
+      net = FeeCalculator.net_amount(order.amount)
 
       total_fees += fee
       total_amount += net
