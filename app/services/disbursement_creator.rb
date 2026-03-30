@@ -38,7 +38,8 @@ class DisbursementCreator
 
   def process_merchant(merchant)
     orders = eligible_orders(merchant)
-    return if orders.empty?
+    refunds = eligible_refunds(merchant)
+    return if orders.empty? && refunds.empty?
 
     # Check if disbursement already exists for this merchant and date
     existing_disbursement = Disbursement.find_by(merchant: merchant, date: date)
@@ -73,5 +74,10 @@ class DisbursementCreator
 
   def eligible_orders(merchant)
     Order.eligible_for_disbursement(merchant, date)
+  end
+
+
+  def eligible_refunds(merchant)
+    Refunds.eligible_for_disbursement(merchant, date)
   end
 end
